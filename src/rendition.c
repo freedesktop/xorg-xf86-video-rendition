@@ -1,4 +1,4 @@
-/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/rendition.c,v 1.50 2002/10/08 22:14:10 tsi Exp $ */
+/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/rendition.c,v 1.58 2003/11/03 05:11:26 tsi Exp $ */
 /*
  * Copyright (C) 1998 The XFree86 Project, Inc.  All Rights Reserved.
  *
@@ -152,12 +152,14 @@ static const char *ramdacSymbols[] = {
     NULL
 };
 
+#if defined(XFree86LOADER) || USE_ACCEL
 static const char *xaaSymbols[] = {
     "XAACreateInfoRec",
     "XAADestroyInfoRec",
     "XAAInit",
     NULL
 };
+#endif
 
 static const char *ddcSymbols[] = {
     "xf86DoEDID_DDC1",
@@ -171,11 +173,13 @@ static const char *int10Symbols[] = {
     NULL
 };
 
+#ifdef XFree86LOADER
 static const char *miscfbSymbols[]={
     "xf1bppScreenInit",
     "xf4bppScreenInit",
     NULL
 };
+#endif
 
 static const char *fbSymbols[]={
     "fbScreenInit",
@@ -251,7 +255,7 @@ enum renditionTypes {
 /* supported chipsets */
 static SymTabRec renditionChipsets[] = {
     {CHIP_RENDITION_V1000, "V1000"},
-    {CHIP_RENDITION_V2x00, "V2100/V2200"},
+    {CHIP_RENDITION_V2x00, "V2x00"},
     {-1,                   NULL}
 };
 
@@ -526,7 +530,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     pScreenInfo->racIoFlags = RAC_FB | RAC_COLORMAP | RAC_CURSOR | RAC_VIEWPORT;
     
     /* determine depth, bpp, etc. */
-    if (!xf86SetDepthBpp(pScreenInfo, 8, 8, 8, Support32bppFb))
+    if (!xf86SetDepthBpp(pScreenInfo, 0, 0, 0, Support32bppFb))
         return FALSE;
 
     if (pScreenInfo->depth == 15)
@@ -599,8 +603,10 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
       renditionClockRange.clockIndex = -1;
     }
 
-    /***********************************************/
-    /* ensure vgahw private structure is allocated */
+    if (!xf86LoadSubModule(pScreenInfo, "vgahw")){
+        return FALSE;
+    }
+    xf86LoaderReqSymLists(vgahwSymbols, NULL);
 
     if (!vgaHWGetHWRec(pScreenInfo))
         return FALSE;
@@ -631,7 +637,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     /* I do not get the IO base addres <ml> */
     /* XXX Is this still true?  If so, the wrong base is being checked */
     xf86DrvMsg(pScreenInfo->scrnIndex, X_PROBED,
-	       "Rendition %s @ %x/%x\n",
+	       "Rendition %s @ %lx/%lx\n",
 	       renditionChipsets[pRendition->board.chip==V1000_DEVICE ? 0:1]
 	       .name,
 	       pRendition->PciInfo->ioBase[1],
@@ -656,11 +662,6 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     pRendition->board.mem_size=videoRam * 1024;
 
     /* Load the needed symbols */
-
-    if (!xf86LoadSubModule(pScreenInfo, "vgahw")){
-        return FALSE;
-    }
-    xf86LoaderReqSymLists(vgahwSymbols, NULL);
 
     pRendition->board.shadowfb=TRUE;
 
@@ -733,13 +734,13 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
 #else
     /* Load DDC module if needed */
     if (!xf86ReturnOptValBool(pRendition->Options, OPTION_NO_DDC,0)){
-      if (!xf86LoadSubModule(pScreenInfo, "vbe")) {
+      if (!xf86LoadSubModule(pScreenInfo, "ddc")) {
 	xf86DrvMsg(pScreenInfo->scrnIndex, X_ERROR,
 		   ("Loading of DDC library failed, skipping DDC-probe\n"));
       }
       else {
 	  xf86MonPtr mon;
-	  xf86LoaderReqSymLists(vbeSymbols, NULL);
+	  xf86LoaderReqSymLists(ddcSymbols, NULL);
 	  mon = renditionProbeDDC(pScreenInfo, pRendition->pEnt->index);
 	  xf86PrintEDID(mon);
 	  xf86SetDDCproperties(pScreenInfo, mon);
@@ -911,15 +912,12 @@ static Bool
 renditionSetMode(ScrnInfoPtr pScreenInfo, DisplayModePtr pMode)
 {
     struct verite_modeinfo_t *modeinfo=&RENDITIONPTR(pScreenInfo)->mode;
-    vgaHWPtr pvgaHW;
 
 #ifdef DEBUG
     ErrorF("RENDITION: renditionSetMode() called\n");
     ErrorF("Setmode...!!!!\n");
     sleep(1);
 #endif
-
-    pvgaHW = VGAHWPTR(pScreenInfo);
 
     /* construct a modeinfo for the verite_setmode function */
     modeinfo->clock=pMode->SynthClock;
@@ -1482,16 +1480,4 @@ renditionDDC1Read (ScrnInfoPtr pScreenInfo)
   return value;
 }
 
-void
-renditionProbeDDC(ScrnInfoPtr pScreenInfo, int index)
-{
-  vbeInfoPtr pVbe;
-  if (xf86LoadSubModule(pScreenInfo, "vbe")) {
-    xf86LoaderReqSymLists(vbeSymbols, NULL);
-
-    pVbe = VBEInit(NULL,index);
-    ConfiguredMonitor = vbeDoEDID(pVbe, NULL);
-    vbeFree(pVbe);
-  }
-}
 #endif
