@@ -1,4 +1,4 @@
-/* $XFree86$ */
+/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/vmodes.h,v 1.5 2002/04/04 14:05:45 eich Exp $ */
 /*
  * file vmodes.h
  *

@@ -3,7 +3,7 @@
  *
  * accelerator functions for X
  */
-/* $XFree86$ */
+/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/accelX.c,v 1.12 2002/04/04 14:05:45 eich Exp $ */
 
 
 

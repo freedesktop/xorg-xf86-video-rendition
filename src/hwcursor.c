@@ -1,4 +1,4 @@
-/* $XFree86$ */
+/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/hwcursor.c,v 1.8 2002/04/04 14:05:45 eich Exp $ */
 /*
  * includes
  */
