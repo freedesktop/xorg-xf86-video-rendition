@@ -354,8 +354,8 @@ renditionProbe(DriverPtr drv, int flags)
 		foundScreen=TRUE;
 	    }
         }
+	xfree(usedChips);
     }
-    xfree(usedChips);
     return foundScreen;
 }
 
