@@ -1,7 +1,7 @@
 /****************************************************************************\ 
  *       NOTE: This file generated automatically. Do not edit by hand!      *
 \****************************************************************************/
-/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/cscode.h,v 1.3 1999/10/13 04:21:19 dawes Exp $ */
+/* $XFree86$ */
 
 #ifndef __CSCODE_H__
 #define __CSCODE_H__
