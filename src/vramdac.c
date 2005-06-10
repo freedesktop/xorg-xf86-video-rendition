@@ -170,8 +170,9 @@ verite_initdac(ScrnInfoPtr pScreenInfo, vu8 bpp, vu8 doubleclock)
     switch (bpp) {
         case 1:
         case 4:
-			ErrorF("%s %s: color depth %d not (yet ?) supported\n",
-				X_CONFIG, /*vga256InfoRec.name*/"Rendition", bpp);
+			xf86DrvMsg(pScreenInfo->scrnIndex, X_CONFIG,
+				   "color depth %d not (yet ?) supported\n",
+				   bpp);
 			return -1;
 
         case 8:
@@ -232,8 +233,8 @@ verite_initdac(ScrnInfoPtr pScreenInfo, vu8 bpp, vu8 doubleclock)
             break;
 
         default:
-            ErrorF( "%s %s: Color depth not supported (%d bpp)\n",
-	    	    X_CONFIG, /*vga256InfoRec.name*/"Rendition", bpp);
+            xf86DrvMsg(pScreenInfo->scrnIndex, X_CONFIG,
+			"Color depth not supported (%d bpp)\n", bpp);
             return -1;
             break;
     }
