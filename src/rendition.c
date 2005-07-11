@@ -34,6 +34,10 @@
  * Additions, updates and bugfixes by Dejan Ilic <dejan.ilic@home.se>
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 /*
  * Activate acceleration code or not.
  *
