@@ -57,3 +57,11 @@ rendition_drv_la_SOURCES = \
          vramdac.c \
          vramdac.h \
          vtypes.h
+
+driverdir = @moduledir@
+driver_DATA = \
+	v10002d.uc \
+	v20002d.uc
+
+EXTRA_DIST = \
+	README.uc
