@@ -60,8 +60,11 @@ rendition_drv_la_SOURCES = \
 
 driverdir = @moduledir@
 driver_DATA = \
-	v10002d.uc \
-	v20002d.uc
+	v10002d.uc		\
+	v20002d.uc		\
+	vgafont-std.data	\
+	vgafont-vrx.data	\
+	vgapalette.data	
 
 EXTRA_DIST = \
 	README.uc
