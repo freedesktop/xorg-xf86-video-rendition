@@ -59,7 +59,7 @@ rendition_drv_la_SOURCES = \
          vtypes.h
 
 driverdir = @moduledir@
-driver_DATA = \
+dist_driver_DATA = \
 	v10002d.uc		\
 	v20002d.uc		\
 	vgafont-std.data	\
