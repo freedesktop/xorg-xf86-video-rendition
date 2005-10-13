@@ -193,14 +193,6 @@ static const char *int10Symbols[] = {
     NULL
 };
 
-#ifdef XFree86LOADER
-static const char *miscfbSymbols[]={
-    "xf1bppScreenInit",
-    "xf4bppScreenInit",
-    NULL
-};
-#endif
-
 static const char *fbSymbols[]={
     "fbScreenInit",
     "fbPictureInit",
@@ -252,7 +244,7 @@ renditionSetup(pointer Module, pointer Options, int *ErrorMajor,
     if (!Initialised) {
         Initialised=TRUE;
         xf86AddDriver(&RENDITION, Module, 0);
-        LoaderRefSymLists(vgahwSymbols, ramdacSymbols, miscfbSymbols,
+        LoaderRefSymLists(vgahwSymbols, ramdacSymbols,
 			  fbSymbols, xaaSymbols, ddcSymbols, int10Symbols,
 			  shadowfbSymbols, vbeSymbols, NULL);
         return (pointer)TRUE;
