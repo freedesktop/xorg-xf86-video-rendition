@@ -13,7 +13,7 @@
 #include "vloaduc.h"
 #include "vos.h"
 
-#if defined(SCO) || defined(SCO325)
+#if !defined(PATH_MAX)
 #define PATH_MAX 1024
 #endif
 
