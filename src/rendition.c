@@ -789,32 +789,6 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     }
 #endif
 
-    /*
-     * Determine clocks.  Limit them to the first four because that's all that
-     * can be addressed.
-     * XXX Aren't the clocks programmable?  If so, this discrete clock stuff
-     * shouldn't be used.
-     */
-#if 0
-    if ((pScreenInfo->numClocks = pRendition->pEnt->device->numclocks))
-    {
-        if (pScreenInfo->numClocks > 4)
-            pScreenInfo->numClocks = 4;
-        for (i = 0;  i < pScreenInfo->numClocks;  i++)
-            pScreenInfo->clock[i] = pRendition->pEnt->device->clock[i];
-        From = X_CONFIG;
-    }
-    else
-    {
-        xf86GetClocks(pScreenInfo, 4,
-	    renditionClockSelect, renditionProtect, renditionBlankScreen,
-	    pvgaHW->PIOOffset + pvgaHW->IOBase + VGA_IN_STAT_1_OFFSET,
-	    0x08, 1, 28322);
-        From = X_PROBED;
-    }
-    xf86ShowClocks(pScreenInfo, From);
-#endif
-
     /* Set the virtual X rounding (in bits) */
     if (pScreenInfo->depth == 8)
         Rounding = 16 * 8;

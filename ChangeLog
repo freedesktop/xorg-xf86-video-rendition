@@ -1,3 +1,10 @@
+2006-02-08  Luc Verhaegen  <libv@skynet.be>
+
+	* src/rendition.c: (renditionPreInit):
+
+	Cull ifdeffed out code which used to call xf86GetClocks.
+	Rendition has programmable dotclock anyway.
+
 2005-12-20  Kevin E. Martin  <kem-at-freedesktop-dot-org>
 
 	* configure.ac:
