@@ -1,14 +1,16 @@
-/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/rendition.h,v 1.7 2001/05/16 06:48:10 keithp Exp $ */
+/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/rendition.h,v 1.5 2000/02/25 21:03:02 dawes Exp $ */
 
 #ifndef __RENDITION_H__
 #define __RENDITION_H__
+
+#include <string.h>
+#include <math.h>
 
 /* All drivers should typically include these */
 #include "xf86.h"
 #include "xf86_OSproc.h"
 
 /* All drivers need this */
-#include "xf86_ansic.h"
 
 /* Everything using inb/outb, etc needs "compiler.h" */
 #include "compiler.h"
