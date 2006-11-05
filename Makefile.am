@@ -27,3 +27,12 @@ README: README.sgml
 endif
 
 EXTRA_DIST = README.sgml
+
+CLEANFILES = ChangeLog
+
+.PHONY: ChangeLog
+
+ChangeLog:
+	git-log > ChangeLog
+
+dist-hook: ChangeLog
