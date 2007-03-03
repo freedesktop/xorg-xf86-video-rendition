@@ -144,7 +144,8 @@ _X_EXPORT DriverRec RENDITION={
     renditionProbe,
     renditionAvailableOptions,
     NULL,
-    0
+    0,
+    NULL
 };
 
 static const char *vgahwSymbols[]={
@@ -239,19 +240,19 @@ static pointer
 renditionSetup(pointer Module, pointer Options, int *ErrorMajor, 
                int *ErrorMinor)
 {
-    static Bool Initialised=FALSE;
+    static Bool Initialised = FALSE;
 
     if (!Initialised) {
-        Initialised=TRUE;
-        xf86AddDriver(&RENDITION, Module, 0);
+        Initialised = TRUE;
+        xf86AddDriver(&RENDITION, Module, 1);
         LoaderRefSymLists(vgahwSymbols, ramdacSymbols,
 			  fbSymbols, xaaSymbols, ddcSymbols, int10Symbols,
 			  shadowfbSymbols, vbeSymbols, NULL);
-        return (pointer)TRUE;
+        return (pointer) TRUE;
     }
 
     if (ErrorMajor)
-        *ErrorMajor=LDR_ONCEONLY;
+        *ErrorMajor = LDR_ONCEONLY;
 
     return NULL;
 }
