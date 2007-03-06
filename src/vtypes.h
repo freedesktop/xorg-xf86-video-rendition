@@ -11,6 +11,9 @@
 #include <X11/Xmd.h>
 #include "xf86Pci.h"
 
+#ifdef PCIACCESS
+#include <pciaccess.h>
+#endif
 
 /*
  * defines
@@ -177,8 +180,12 @@ typedef struct _renditionRec
 {
     struct verite_board_t board;        /* information on the board */
     struct verite_modeinfo_t mode;      /* information on the mode */
+#ifdef PCIACCESS
+    struct pci_device * PciInfo;
+#else
     PCITAG pcitag;                      /* tag for the PCI config space */
     pciVideoPtr PciInfo;                /* PCI config data */
+#endif
     EntityInfoPtr pEnt;                 /* entity information */
     CloseScreenProcPtr CloseScreen;     /* wrap CloseScreen */
     xf86CursorInfoPtr CursorInfoRec;    /* Cursor data */

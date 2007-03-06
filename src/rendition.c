@@ -64,6 +64,14 @@
 #include "rendition_shadow.h"
 #include "vbe.h"
 
+#ifdef PCIACCESS
+# include <pciaccess.h>
+# define DEVICE_ID(p)  (p)->device_id
+#else
+# define DEVICE_ID(p)  (p)->chipType
+#endif
+
+
 /*
  * defines
  */
@@ -101,7 +109,12 @@ static const int MAX_VTOTAL   = 2184;
 
 static const OptionInfoRec * renditionAvailableOptions(int, int);
 static void       renditionIdentify(int);
+#ifdef PCIACCESS
+static Bool renditionPciProbe(DriverPtr drv, int entity_num,
+    struct pci_device *dev, intptr_t match_data);
+#else
 static Bool       renditionProbe(DriverPtr, int);
+#endif
 static Bool       renditionPreInit(ScrnInfoPtr, int);
 static Bool       renditionScreenInit(int, ScreenPtr, int, char **);
 static Bool       renditionSwitchMode(int, DisplayModePtr, int);
@@ -150,21 +163,42 @@ static SymTabRec renditionChipsets[] = {
     {-1,                   NULL}
 };
 
+#ifdef PCIACCESS
+#define RENDITION_DEVICE_MATCH(d, i) \
+    { 0x1163, (d), PCI_MATCH_ANY, PCI_MATCH_ANY, 0, 0, (i) }
+
+static const struct pci_id_match rendition_device_match[] = {
+    RENDITION_DEVICE_MATCH(PCI_CHIP_V1000, CHIP_RENDITION_V1000),
+    RENDITION_DEVICE_MATCH(PCI_CHIP_V2x00, CHIP_RENDITION_V2x00),
+
+    { 0, 0, 0 }
+};
+#else
 static PciChipsets renditionPCIchipsets[] = {
   { CHIP_RENDITION_V1000, PCI_CHIP_V1000, RES_SHARED_VGA },
   { CHIP_RENDITION_V2x00, PCI_CHIP_V2x00, RES_SHARED_VGA },
   { -1,                   -1,             RES_UNDEFINED }
 };
+#endif
 
 _X_EXPORT DriverRec RENDITION={
     RENDITION_VERSION_CURRENT,
     "rendition",
     renditionIdentify,
+#ifdef PCIACCESS
+    NULL,
+#else
     renditionProbe,
+#endif
     renditionAvailableOptions,
     NULL,
     0,
-    NULL
+    NULL,
+
+#ifdef PCIACCESS
+    rendition_device_match,
+    renditionPciProbe
+#endif
 };
 
 static const char *vgahwSymbols[]={
@@ -299,6 +333,49 @@ renditionIdentify(int flags)
 
 
 
+#ifdef PCIACCESS
+static Bool
+renditionPciProbe(DriverPtr drv, int entity_num, struct pci_device *dev,
+		  intptr_t match_data)
+{
+    ScrnInfoPtr pScrn;
+
+
+    /* Allocate a ScrnInfoRec and claim the slot */
+    pScrn = xf86ConfigPciEntity(NULL, 0, entity_num, NULL, RES_SHARED_VGA,
+				NULL, NULL, NULL, NULL);
+    if (pScrn != NULL) {
+	renditionPtr pRendition;
+
+
+	pScrn->driverVersion = RENDITION_VERSION_CURRENT;
+	pScrn->driverName    = RENDITION_DRIVER_NAME;
+	pScrn->name          = RENDITION_NAME;
+	pScrn->Probe         = NULL;
+	pScrn->PreInit       = renditionPreInit;
+	pScrn->ScreenInit    = renditionScreenInit;
+	pScrn->SwitchMode    = renditionSwitchMode;
+	pScrn->AdjustFrame   = renditionAdjustFrame;
+	pScrn->EnterVT       = renditionEnterVT;
+	pScrn->LeaveVT       = renditionLeaveVT;
+	pScrn->FreeScreen    = renditionFreeScreen;
+	pScrn->ValidMode     = renditionValidMode;
+
+	/* allocate driver private structure */
+	pRendition = renditionGetRec(pScrn);
+	if (pRendition == NULL) {
+	    return FALSE;
+	}
+
+	pRendition->pEnt = xf86GetEntityInfo(entity_num);
+	pRendition->PciInfo = dev;
+    }
+
+    return (pScrn != NULL);
+}
+
+#else
+
 /*
  * This function is called once, at the start of the first server generation to
  * do a minimal probe for supported hardware.
@@ -356,7 +433,7 @@ renditionProbe(DriverPtr drv, int flags)
     }
     return foundScreen;
 }
-
+#endif
 
 #if 0
 static Bool
@@ -493,16 +570,20 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     if (pScreenInfo->numEntities != 1)
 	return FALSE;
 
+#ifndef PCIACCESS
     /* allocate driver private structure */
     if (!renditionGetRec(pScreenInfo))
         return FALSE;
+#endif
 
     pRendition=RENDITIONPTR(pScreenInfo);
 
+#ifndef PCIACCESS
     /* Get the entity, and make sure it is PCI. */
     pRendition->pEnt = xf86GetEntityInfo(pScreenInfo->entityList[0]);
     if (pRendition->pEnt->location.type != BUS_PCI)
 	return FALSE;
+#endif
 
     if (flags & PROBE_DETECT) {
         ConfiguredMonitor = 
@@ -524,10 +605,12 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
         xf86FreeInt10(pInt);
     }
 
+#ifndef PCIACCESS
     /* Find the PCI info for this screen */
     pRendition->PciInfo = xf86GetPciInfoForEntity(pRendition->pEnt->index);
     pRendition->pcitag= pciTag(pRendition->PciInfo->bus,
                pRendition->PciInfo->device, pRendition->PciInfo->func);
+#endif
 
     /*
      * XXX This could be refined if some VGA memory resources are not
@@ -559,7 +642,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
 
         case 15:
         {
-            if (PCI_CHIP_V1000 != pRendition->PciInfo->chipType) {
+            if (PCI_CHIP_V1000 == DEVICE_ID(pRendition->PciInfo)) {
                 xf86DrvMsg( pScreenInfo->scrnIndex, X_ERROR,
                         "Given depth (%d) is not supported by this chipset.\n",
                         pScreenInfo->depth);
@@ -633,7 +716,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     /* set various fields according to the given options */
     /* to be filled in <ml> */
 
-    if (PCI_CHIP_V1000==pRendition->PciInfo->chipType){
+    if (PCI_CHIP_V1000 == DEVICE_ID(pRendition->PciInfo)) {
       pRendition->board.chip=V1000_DEVICE;
     }
     else {
@@ -656,12 +739,19 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
 
     pRendition->board.accel=0;
     pRendition->board.vgaio_base = pvgaHW->PIOOffset;
-    pRendition->board.io_base =
-	pRendition->board.vgaio_base + pRendition->PciInfo->ioBase[1];
+    pRendition->board.io_base = pRendition->board.vgaio_base 
+#ifdef PCIACCESS
+	+ pRendition->PciInfo->regions[1].base_addr;
+#else
+	+ pRendition->PciInfo->ioBase[1]
+#endif
+	;
     pRendition->board.mmio_base=0;
     pRendition->board.vmmio_base=0;
     pRendition->board.mem_size=0;
+#ifndef PCIACCESS
     pRendition->board.mem_base=(vu8 *)pRendition->PciInfo->memBase[0];
+#endif
     pRendition->board.vmem_base=NULL;
     pRendition->board.init=0;
 
@@ -679,8 +769,14 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
 	       "Rendition %s @ %lx/%lx\n",
 	       renditionChipsets[pRendition->board.chip==V1000_DEVICE ? 0:1]
 	       .name,
+#ifdef PCIACCESS
+	       pRendition->PciInfo->regions[1].base_addr,
+	       pRendition->PciInfo->regions[0].base_addr
+#else
 	       pRendition->PciInfo->ioBase[1],
-	       pRendition->PciInfo->memBase[0]);
+	       pRendition->PciInfo->memBase[0]
+#endif
+	       );
 
     /* First of all get a "clean" starting state */
     verite_resetboard(pScreenInfo);
@@ -1365,12 +1461,17 @@ renditionMapMem(ScrnInfoPtr pScreenInfo)
     Bool WriteCombine;
     int mapOption;
     renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
+#ifdef PCIACCESS
+    int err;
+#endif
 
 #ifdef DEBUG
     ErrorF("Mapping ...\n");
+#ifndef PCIACCESS
     ErrorF("%d %d %d %x %d\n", pScreenInfo->scrnIndex, VIDMEM_FRAMEBUFFER, 
 	   pRendition->pcitag,
 	   pRendition->board.mem_base, pScreenInfo->videoRam * 1024);
+#endif
 #endif
 
     if (pRendition->board.chip == V1000_DEVICE){
@@ -1394,12 +1495,19 @@ renditionMapMem(ScrnInfoPtr pScreenInfo)
 	mapOption = VIDMEM_MMIO;
     }
 
+#ifdef PCIACCESS
+    err = pci_device_map_region(pRendition->PciInfo, 0, TRUE);
+    pRendition->board.vmem_base = pRendition->PciInfo->regions[0].memory;
+
+    return (err == 0);
+#else
     pRendition->board.vmem_base=
         xf86MapPciMem(pScreenInfo->scrnIndex, mapOption,
 		      pRendition->pcitag,
 		      (unsigned long)pRendition->board.mem_base,
 		      pScreenInfo->videoRam * 1024);
     return TRUE;
+#endif
     
 #ifdef DEBUG0
     ErrorF("Done\n");
