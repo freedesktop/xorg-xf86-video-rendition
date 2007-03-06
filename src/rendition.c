@@ -138,6 +138,24 @@ OptionInfoRec const renditionOptions[]={
     { -1,                NULL,      OPTV_NONE,    {0}, FALSE }
 };
 
+enum renditionTypes {
+    CHIP_RENDITION_V1000,
+    CHIP_RENDITION_V2x00
+};
+
+/* supported chipsets */
+static SymTabRec renditionChipsets[] = {
+    {CHIP_RENDITION_V1000, "V1000"},
+    {CHIP_RENDITION_V2x00, "V2x00"},
+    {-1,                   NULL}
+};
+
+static PciChipsets renditionPCIchipsets[] = {
+  { CHIP_RENDITION_V1000, PCI_CHIP_V1000, RES_SHARED_VGA },
+  { CHIP_RENDITION_V2x00, PCI_CHIP_V2x00, RES_SHARED_VGA },
+  { -1,                   -1,             RES_UNDEFINED }
+};
+
 _X_EXPORT DriverRec RENDITION={
     RENDITION_VERSION_CURRENT,
     "rendition",
@@ -260,24 +278,6 @@ renditionSetup(pointer Module, pointer Options, int *ErrorMajor,
 
 #endif
 
-
-enum renditionTypes {
-    CHIP_RENDITION_V1000,
-    CHIP_RENDITION_V2x00
-};
-
-/* supported chipsets */
-static SymTabRec renditionChipsets[] = {
-    {CHIP_RENDITION_V1000, "V1000"},
-    {CHIP_RENDITION_V2x00, "V2x00"},
-    {-1,                   NULL}
-};
-
-static PciChipsets renditionPCIchipsets[] = {
-  { CHIP_RENDITION_V1000, PCI_CHIP_V1000, RES_SHARED_VGA },
-  { CHIP_RENDITION_V2x00, PCI_CHIP_V2x00, RES_SHARED_VGA },
-  { -1,                   -1,             RES_UNDEFINED }
-};
 
 /*
  * functions
