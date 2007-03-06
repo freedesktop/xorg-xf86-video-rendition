@@ -120,6 +120,7 @@ static unsigned int renditionDDC1Read (ScrnInfoPtr pScreenInfo);
 static xf86MonPtr renditionProbeDDC(ScrnInfoPtr pScrn, int index);
 
 static void renditionLoadPalette(ScrnInfoPtr, int, int *, LOCO *, VisualPtr);
+static renditionPtr renditionGetRec(ScrnInfoPtr pScreenInfo);
 
 
 /* 
