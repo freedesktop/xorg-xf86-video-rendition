@@ -64,7 +64,7 @@
 #include "rendition_shadow.h"
 #include "vbe.h"
 
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 # include <pciaccess.h>
 # define DEVICE_ID(p)  (p)->device_id
 #else
@@ -109,7 +109,7 @@ static const int MAX_VTOTAL   = 2184;
 
 static const OptionInfoRec * renditionAvailableOptions(int, int);
 static void       renditionIdentify(int);
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 static Bool renditionPciProbe(DriverPtr drv, int entity_num,
     struct pci_device *dev, intptr_t match_data);
 #else
@@ -163,7 +163,7 @@ static SymTabRec renditionChipsets[] = {
     {-1,                   NULL}
 };
 
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 #define RENDITION_DEVICE_MATCH(d, i) \
     { 0x1163, (d), PCI_MATCH_ANY, PCI_MATCH_ANY, 0, 0, (i) }
 
@@ -185,7 +185,7 @@ _X_EXPORT DriverRec RENDITION={
     RENDITION_VERSION_CURRENT,
     "rendition",
     renditionIdentify,
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     NULL,
 #else
     renditionProbe,
@@ -195,7 +195,7 @@ _X_EXPORT DriverRec RENDITION={
     0,
     NULL,
 
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     rendition_device_match,
     renditionPciProbe
 #endif
@@ -333,7 +333,7 @@ renditionIdentify(int flags)
 
 
 
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 static Bool
 renditionPciProbe(DriverPtr drv, int entity_num, struct pci_device *dev,
 		  intptr_t match_data)
@@ -570,7 +570,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     if (pScreenInfo->numEntities != 1)
 	return FALSE;
 
-#ifndef PCIACCESS
+#ifndef XSERVER_LIBPCIACCESS
     /* allocate driver private structure */
     if (!renditionGetRec(pScreenInfo))
         return FALSE;
@@ -578,7 +578,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
 
     pRendition=RENDITIONPTR(pScreenInfo);
 
-#ifndef PCIACCESS
+#ifndef XSERVER_LIBPCIACCESS
     /* Get the entity, and make sure it is PCI. */
     pRendition->pEnt = xf86GetEntityInfo(pScreenInfo->entityList[0]);
     if (pRendition->pEnt->location.type != BUS_PCI)
@@ -605,7 +605,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
         xf86FreeInt10(pInt);
     }
 
-#ifndef PCIACCESS
+#ifndef XSERVER_LIBPCIACCESS
     /* Find the PCI info for this screen */
     pRendition->PciInfo = xf86GetPciInfoForEntity(pRendition->pEnt->index);
     pRendition->pcitag= pciTag(pRendition->PciInfo->bus,
@@ -740,7 +740,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     pRendition->board.accel=0;
     pRendition->board.vgaio_base = pvgaHW->PIOOffset;
     pRendition->board.io_base = pRendition->board.vgaio_base 
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 	+ pRendition->PciInfo->regions[1].base_addr;
 #else
 	+ pRendition->PciInfo->ioBase[1]
@@ -749,7 +749,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     pRendition->board.mmio_base=0;
     pRendition->board.vmmio_base=0;
     pRendition->board.mem_size=0;
-#ifndef PCIACCESS
+#ifndef XSERVER_LIBPCIACCESS
     pRendition->board.mem_base=(vu8 *)pRendition->PciInfo->memBase[0];
 #endif
     pRendition->board.vmem_base=NULL;
@@ -769,7 +769,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
 	       "Rendition %s @ %lx/%lx\n",
 	       renditionChipsets[pRendition->board.chip==V1000_DEVICE ? 0:1]
 	       .name,
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 	       pRendition->PciInfo->regions[1].base_addr,
 	       pRendition->PciInfo->regions[0].base_addr
 #else
@@ -1461,13 +1461,13 @@ renditionMapMem(ScrnInfoPtr pScreenInfo)
     Bool WriteCombine;
     int mapOption;
     renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     int err;
 #endif
 
 #ifdef DEBUG
     ErrorF("Mapping ...\n");
-#ifndef PCIACCESS
+#ifndef XSERVER_LIBPCIACCESS
     ErrorF("%d %d %d %x %d\n", pScreenInfo->scrnIndex, VIDMEM_FRAMEBUFFER, 
 	   pRendition->pcitag,
 	   pRendition->board.mem_base, pScreenInfo->videoRam * 1024);
@@ -1495,7 +1495,7 @@ renditionMapMem(ScrnInfoPtr pScreenInfo)
 	mapOption = VIDMEM_MMIO;
     }
 
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     err = pci_device_map_region(pRendition->PciInfo, 0, TRUE);
     pRendition->board.vmem_base = pRendition->PciInfo->regions[0].memory;
 

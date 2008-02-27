@@ -11,7 +11,7 @@
 #include <X11/Xmd.h>
 #include "xf86Pci.h"
 
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
 #include <pciaccess.h>
 #endif
 
@@ -180,7 +180,7 @@ typedef struct _renditionRec
 {
     struct verite_board_t board;        /* information on the board */
     struct verite_modeinfo_t mode;      /* information on the mode */
-#ifdef PCIACCESS
+#ifdef XSERVER_LIBPCIACCESS
     struct pci_device * PciInfo;
 #else
     PCITAG pcitag;                      /* tag for the PCI config space */
