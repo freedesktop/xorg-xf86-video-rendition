@@ -1517,12 +1517,20 @@ renditionMapMem(ScrnInfoPtr pScreenInfo)
 static Bool
 renditionUnmapMem(ScrnInfoPtr pScreenInfo)
 {
+  renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
 #ifdef DEBUG
   ErrorF("Unmapping ...\n");
 #endif
+
+#ifndef XSERVER_LIBPCIACCESS
     xf86UnMapVidMem(pScreenInfo->scrnIndex,
-        RENDITIONPTR(pScreenInfo)->board.vmem_base, 
+        pRendition->board.vmem_base, 
 		    pScreenInfo->videoRam * 1024);
+#else
+    pci_device_unmap_range(pRendition->PciInfo, 
+			   pRendition->board.vmem_base,
+			   pScreenInfo->videoRam * 1024);
+#endif
     return TRUE;
 #ifdef DEBUG0
     ErrorF("Done\n");
