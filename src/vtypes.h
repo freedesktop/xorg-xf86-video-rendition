@@ -1,4 +1,3 @@
-/* $XFree86: xc/programs/Xserver/hw/xfree86/drivers/rendition/vtypes.h,v 1.8 2001/10/28 03:33:44 tsi Exp $ */
 #ifndef _VTYPES_H_
 #define _VTYPES_H_
 
