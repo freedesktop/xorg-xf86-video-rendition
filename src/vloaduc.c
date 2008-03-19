@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
 #ifdef HAVE_ELF_H
 #include <elf.h>
 #endif
