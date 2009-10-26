@@ -28,8 +28,6 @@ endif
 
 EXTRA_DIST = README.sgml
 
-CLEANFILES = ChangeLog
-
 .PHONY: ChangeLog
 
 ChangeLog:
