@@ -1,14 +1,11 @@
 <!DOCTYPE linuxdoc PUBLIC "-//Xorg//DTD linuxdoc//EN"[
-<!ENTITY % defs SYSTEM "defs.ent"> %defs;
+<!ENTITY % defs SYSTEM "X11/defs.ent"> %defs;
 ]>
 
 <article>
 <title>Information for Rendition (Micron) Verit&eacute; Users
 <author>The XFree86 Project Inc.
-<date>9 June 2000, last update by Dejan Ilic <email>dejan.ilic@home.se</email>
-
-<ident>
-</ident>
+<date>9 June 2000, last update by Dejan Ilic "dejan.ilic@home.se"
 
 <toc>
 
