@@ -87,8 +87,6 @@ AC_SUBST([moduledir])
 DRIVER_NAME=rendition
 AC_SUBST([DRIVER_NAME])
 
-XORG_CHECK_LINUXDOC
-
 AC_OUTPUT([
 	Makefile
 	src/Makefile
