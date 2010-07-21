@@ -77,7 +77,6 @@ fi
 AM_CONDITIONAL(XSERVER_LIBPCIACCESS, test "x$XSERVER_LIBPCIACCESS" = xyes)
 
 # Checks for header files.
-AC_HEADER_STDC
 AC_CHECK_HEADERS([elf.h] [elf_abi.h])
 
 AC_SUBST([XORG_CFLAGS])
