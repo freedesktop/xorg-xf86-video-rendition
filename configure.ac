@@ -79,7 +79,6 @@ AM_CONDITIONAL(XSERVER_LIBPCIACCESS, test "x$XSERVER_LIBPCIACCESS" = xyes)
 # Checks for header files.
 AC_CHECK_HEADERS([elf.h] [elf_abi.h])
 
-AC_SUBST([XORG_CFLAGS])
 AC_SUBST([moduledir])
 
 DRIVER_NAME=rendition
