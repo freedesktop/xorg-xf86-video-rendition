@@ -20,6 +20,7 @@
 #include "v1kregs.h"
 #include "v2kregs.h"
 
+#include <unistd.h>
 
 #undef DEBUG
 
