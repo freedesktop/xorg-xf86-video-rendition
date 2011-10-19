@@ -330,7 +330,7 @@ renditionProbe(DriverPtr drv, int flags)
                     renditionChipsets, renditionPCIchipsets, 
                     devSections, numDevSections, drv, &usedChips);
 
-	xfree(devSections);
+	free(devSections);
 	if (numUsed <= 0)
 	    return FALSE;
 
@@ -359,7 +359,7 @@ renditionProbe(DriverPtr drv, int flags)
 		foundScreen=TRUE;
 	    }
         }
-	xfree(usedChips);
+	free(usedChips);
     }
     return foundScreen;
 }
@@ -400,7 +400,7 @@ renditionGetRec(ScrnInfoPtr pScreenInfo)
     sleep(1);
 #endif
     if (!pScreenInfo->driverPrivate)
-        pScreenInfo->driverPrivate=xcalloc(sizeof(renditionRec), 1);
+        pScreenInfo->driverPrivate=calloc(sizeof(renditionRec), 1);
 
     /* perhaps some initialization? <ml> */
 
@@ -421,7 +421,7 @@ renditionFreeRec(ScrnInfoPtr pScreenInfo)
 #endif
     if (xf86LoaderCheckSymbol("vgaHWFreeHWRec"))
 	vgaHWFreeHWRec(pScreenInfo);
-    xfree(pScreenInfo->driverPrivate);
+    free(pScreenInfo->driverPrivate);
     pScreenInfo->driverPrivate=NULL;
 
 #ifdef DEBUG
@@ -596,7 +596,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     /* collect all of the options flags and process them */
 
     xf86CollectOptions(pScreenInfo, NULL);
-    if (!(pRendition->Options = xalloc(sizeof(renditionOptions))))
+    if (!(pRendition->Options = malloc(sizeof(renditionOptions))))
 	return FALSE;
     memcpy(pRendition->Options, renditionOptions, sizeof(renditionOptions));
     xf86ProcessOptions(pScreenInfo->scrnIndex, pScreenInfo->options, 
@@ -1167,7 +1167,7 @@ renditionScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 	pRendition->board.shadowPitch 
 	    = BitmapBytePad(pScreenInfo->bitsPerPixel * width);
 	pRendition->board.shadowPtr 
-	    = xalloc(pRendition->board.shadowPitch * height);
+	    = malloc(pRendition->board.shadowPitch * height);
 	displayWidth = pRendition->board.shadowPitch 
 	    / (pScreenInfo->bitsPerPixel >> 3);
 	FBBase = pRendition->board.shadowPtr;
