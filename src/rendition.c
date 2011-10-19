@@ -663,7 +663,11 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     vgaHWGetIOBase(pvgaHW);             /* Get VGA I/O base */
 
     pRendition->board.accel=0;
+#if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 12
     pRendition->board.vgaio_base = pvgaHW->PIOOffset;
+#else
+    pRendition->board.vgaio_base = 0;
+#endif
     pRendition->board.io_base = pRendition->board.vgaio_base 
 #ifdef XSERVER_LIBPCIACCESS
 	+ pRendition->PciInfo->regions[1].base_addr;
