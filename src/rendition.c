@@ -1484,7 +1484,7 @@ static xf86MonPtr
 renditionDDC (ScrnInfoPtr pScreenInfo)
 {
   renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
-  IOADDRESS iob=pRendition->board.io_base;
+  unsigned long iob=pRendition->board.io_base;
   vu32 temp;
 
   xf86MonPtr MonInfo = NULL;
@@ -1517,7 +1517,7 @@ static unsigned int
 renditionDDC1Read (ScrnInfoPtr pScreenInfo)
 {
   renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
-  IOADDRESS iob=pRendition->board.io_base;
+  unsigned long iob=pRendition->board.io_base;
   vu32 value = 0;
 
   /* wait for Vsync */

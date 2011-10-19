@@ -123,7 +123,7 @@ struct verite_board_t {
     vu16  chip;
 
     /* */
-    IOADDRESS io_base, vgaio_base;
+    unsigned long io_base, vgaio_base;
     vu32 mmio_base;
     vu32 vmmio_base;
     vu32 mem_size;

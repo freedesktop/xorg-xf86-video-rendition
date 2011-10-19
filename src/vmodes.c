@@ -201,7 +201,7 @@ struct V1000ClocksStr {
  * local function prototypes
  */
 
-static void set_PLL(IOADDRESS iob, vu32 value);
+static void set_PLL(unsigned long iob, vu32 value);
 static double V1000CalcClock(double target, int *M, int *N, int *P);
 static double V2200CalcClock(double target, int *m, int *n, int *p);
 
@@ -509,13 +509,13 @@ verite_getstride(ScrnInfoPtr pScreenInfo, int *width,
  */
 
 /*
- * void set_PLL(IOADDRESS iob, vu32 value)
+ * void set_PLL(unsigned long iob, vu32 value)
  *
  * Set PLL clock to desired frequency for the V1000.
  */
 
 void
-set_PLL(IOADDRESS iob, vu32 value)
+set_PLL(unsigned long iob, vu32 value)
 {
     vu32 ulD;
     int b;
