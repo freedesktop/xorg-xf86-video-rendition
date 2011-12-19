@@ -651,6 +651,7 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
 
     pvgaHW = VGAHWPTR(pScreenInfo);
     pvgaHW->MapSize = 0x00010000;       /* Standard 64kB VGA window */
+    vgaHWSetStdFuncs(pvgaHW);
     vgaHWGetIOBase(pvgaHW);             /* Get VGA I/O base */
 
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 12
