@@ -38,14 +38,6 @@
 #endif
 
 /*
- * Activate acceleration code or not.
- *
- *         WARNING BUGGY !!!
- * Yes, you activate it on your own risk.
- */
-#define USE_ACCEL 0
-
-/*
  * includes 
  */
 
@@ -58,7 +50,6 @@
 #include "vtypes.h"
 #include "vboard.h"
 #include "vmodes.h"
-#include "accel.h"
 #include "vramdac.h"
 #include "rendition_shadow.h"
 #include "vbe.h"
@@ -662,7 +653,6 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
     pvgaHW->MapSize = 0x00010000;       /* Standard 64kB VGA window */
     vgaHWGetIOBase(pvgaHW);             /* Get VGA I/O base */
 
-    pRendition->board.accel=0;
 #if GET_ABI_MAJOR(ABI_VIDEODRV_VERSION) < 12
     pRendition->board.vgaio_base = pvgaHW->PIOOffset;
 #else
@@ -868,31 +858,6 @@ renditionPreInit(ScrnInfoPtr pScreenInfo, int flags)
       xf86DrvMsg(pScreenInfo->scrnIndex, X_CONFIG,
 		 "Software cursor selected\n");
 
-    /* Unmapping delayed until after micrcode loading */
-      /****************************************/
-      /* Reserve memory and load the microcode */
-      /****************************************/
-#if USE_ACCEL
-    if (!xf86ReturnOptValBool(pRendition->Options, OPTION_NOACCEL,0) &&
-	!pRendition->board.shadowfb) {
-	/* Load XAA if needed */
-	if (xf86LoadSubModule(pScreenInfo, "xaa")) {
-	    renditionMapMem(pScreenInfo);
-  	    RENDITIONAccelPreInit (pScreenInfo);
-	    renditionUnmapMem(pScreenInfo);
-	    pRendition->board.accel = TRUE;
-	} else     xf86DrvMsg(pScreenInfo->scrnIndex, X_WARNING,
-			      ("XAA module not found: "
-			       "Skipping acceleration\n"));
-    }
-    else
-      xf86DrvMsg(pScreenInfo->scrnIndex, X_CONFIG,
-		 ("Skipping acceleration on users request\n"));
-#else
-    xf86DrvMsg(pScreenInfo->scrnIndex, X_WARNING,
-	       ("Skipping acceleration\n"));
-#endif
-
 #ifdef DEBUG
     ErrorF("PreInit OK...!!!!\n");
     sleep(2);
@@ -1070,9 +1035,6 @@ renditionCloseScreen(int scrnIndex, ScreenPtr pScreen)
     if (prenditionPriv->board.hwcursor_used)
 	RenditionHWCursorRelease(pScreenInfo);
 
-    if (prenditionPriv->board.accel)
-	RENDITIONAccelNone(pScreenInfo);
-
     if (pScreenInfo->vtSema)
 	renditionLeaveGraphics(pScreenInfo);
 
@@ -1215,10 +1177,6 @@ renditionScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* The actual setup of the driver-specific code          */
     /* has to be after fbScreenInit and before cursor init */
     /*********************************************************/
-#if USE_ACCEL
-    if (pRendition->board.accel) 
-	RENDITIONAccelXAAInit (pScreen);
-#endif
 
     /* Initialise cursor functions */
     xf86SetSilkenMouse(pScreen);

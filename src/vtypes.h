@@ -132,9 +132,6 @@ struct verite_board_t {
     Bool init;
 
     /* */
-    Bool accel;
-
-    /* */
     vu32 csucode_base;
     vu32 ucode_base;
     vu32 ucode_entry;
