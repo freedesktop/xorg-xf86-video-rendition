@@ -161,7 +161,7 @@ struct verite_board_t {
     Bool shadowfb;          /* Use ShadowFB ? */
     vu8 *shadowPtr;
     vu32 shadowPitch;
-    void (*PointerMoved)(int index, int x, int y);
+    void (*PointerMoved)(SCRN_ARG_TYPE arg, int x, int y);
 
     int rotate;             /* Rotate clockwise or counterclockwise */
 

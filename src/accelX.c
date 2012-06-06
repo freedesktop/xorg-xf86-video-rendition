@@ -133,7 +133,7 @@ RENDITIONAccelPreInit(ScrnInfoPtr pScreenInfo)
 void
 RENDITIONAccelXAAInit(ScreenPtr pScreen)
 {
-    ScrnInfoPtr  pScreenInfo = xf86Screens[pScreen->myNum];
+    ScrnInfoPtr  pScreenInfo = xf86ScreenToScrn(pScreen);
     renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
     XAAInfoRecPtr pXAAinfo;
 

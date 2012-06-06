@@ -106,14 +106,14 @@ static Bool renditionPciProbe(DriverPtr drv, int entity_num,
 static Bool       renditionProbe(DriverPtr, int);
 #endif
 static Bool       renditionPreInit(ScrnInfoPtr, int);
-static Bool       renditionScreenInit(int, ScreenPtr, int, char **);
-static Bool       renditionSwitchMode(int, DisplayModePtr, int);
-static void       renditionAdjustFrame(int, int, int, int);
-static Bool       renditionEnterVT(int, int);
-static void       renditionLeaveVT(int, int);
-static void       renditionFreeScreen(int, int);
+static Bool       renditionScreenInit(SCREEN_INIT_ARGS_DECL);
+static Bool       renditionSwitchMode(SWITCH_MODE_ARGS_DECL);
+static void       renditionAdjustFrame(ADJUST_FRAME_ARGS_DECL);
+static Bool       renditionEnterVT(VT_FUNC_ARGS_DECL);
+static void       renditionLeaveVT(VT_FUNC_ARGS_DECL);
+static void       renditionFreeScreen(FREE_SCREEN_ARGS_DECL);
 
-static ModeStatus renditionValidMode(int, DisplayModePtr, Bool, int);
+static ModeStatus renditionValidMode(SCRN_ARG_TYPE, DisplayModePtr, Bool, int);
 static Bool renditionMapMem(ScrnInfoPtr pScreenInfo);
 static Bool renditionUnmapMem(ScrnInfoPtr pScreenInfo);
 #if 0
@@ -1022,9 +1022,9 @@ renditionLeaveGraphics(ScrnInfoPtr pScreenInfo)
 
 /* Unravel the screen */
 static Bool
-renditionCloseScreen(int scrnIndex, ScreenPtr pScreen)
+renditionCloseScreen(CLOSE_SCREEN_ARGS_DECL)
 {
-    ScrnInfoPtr pScreenInfo = xf86Screens[scrnIndex];
+    ScrnInfoPtr pScreenInfo = xf86ScreenToScrn(pScreen);
     renditionPtr prenditionPriv=renditionGetRec(pScreenInfo);
     Bool Closed = TRUE;
 
@@ -1044,7 +1044,7 @@ renditionCloseScreen(int scrnIndex, ScreenPtr pScreen)
     if (prenditionPriv 
 	&& (pScreen->CloseScreen = prenditionPriv->CloseScreen)) {
         prenditionPriv->CloseScreen = NULL;
-        Closed = (*pScreen->CloseScreen)(scrnIndex, pScreen);
+        Closed = (*pScreen->CloseScreen)(CLOSE_SCREEN_ARGS);
     }
     
 #ifdef DEBUG
@@ -1066,9 +1066,9 @@ renditionDPMSSet(ScrnInfoPtr pScreen, int mode, int flags)
 }
 
 static Bool
-renditionScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
+renditionScreenInit(SCREEN_INIT_ARGS_DECL)
 {
-    ScrnInfoPtr pScreenInfo = xf86Screens[scrnIndex];
+    ScrnInfoPtr pScreenInfo = xf86ScreenToScrn(pScreen);
     renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
     Bool Inited = FALSE;
     unsigned char *FBBase;
@@ -1109,8 +1109,8 @@ renditionScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     /* blank the screen */
     renditionSaveScreen(pScreen, SCREEN_SAVER_ON);
 
-    (*pScreenInfo->AdjustFrame)(pScreenInfo->scrnIndex,
-				pScreenInfo->frameX0, pScreenInfo->frameY0, 0);
+    (*pScreenInfo->AdjustFrame)(ADJUST_FRAME_ARGS(pScreenInfo,
+						  pScreenInfo->frameX0, pScreenInfo->frameY0));
 
 
     miClearVisualTypes();
@@ -1186,7 +1186,7 @@ renditionScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     if(!xf86ReturnOptValBool(pRendition->Options, OPTION_SW_CURSOR,0)&&
        !pRendition->board.rotate){
 	/* Initialise HW cursor */
-	if(!RenditionHWCursorInit(scrnIndex, pScreen)){
+	if(!RenditionHWCursorInit(pScreen)){
 	    xf86DrvMsg(pScreenInfo->scrnIndex, X_ERROR,
 		       "Hardware Cursor initalization failed!!\n");
 	}
@@ -1238,7 +1238,7 @@ renditionScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
     pScreen->SaveScreen = renditionSaveScreen;
 
     if (!Inited)
-        renditionCloseScreen(scrnIndex, pScreen);
+        renditionCloseScreen(CLOSE_SCREEN_ARGS);
 
     if (serverGeneration == 1)
 	xf86ShowUnusedOptions(pScreenInfo->scrnIndex, pScreenInfo->options);
@@ -1251,19 +1251,20 @@ renditionScreenInit(int scrnIndex, ScreenPtr pScreen, int argc, char **argv)
 }
 
 static Bool
-renditionSwitchMode(int scrnIndex, DisplayModePtr pMode, int flags)
+renditionSwitchMode(SWITCH_MODE_ARGS_DECL)
 {
+    SCRN_INFO_PTR(arg);
 #ifdef DEBUG
     ErrorF("RENDITION: renditionSwitchMode() called\n");
 #endif
-    return renditionSetMode(xf86Screens[scrnIndex], pMode);
+    return renditionSetMode(pScreenInfo, mode);
 }
 
 
 static void
-renditionAdjustFrame(int scrnIndex, int x, int y, int flags)
+renditionAdjustFrame(ADJUST_FRAME_ARGS_DECL)
 {
-    ScrnInfoPtr pScreenInfo=xf86Screens[scrnIndex];
+    SCRN_INFO_PTR(arg);
     renditionPtr pRendition = RENDITIONPTR(pScreenInfo);
     int offset, virtualwidth, bitsPerPixel;
 
@@ -1285,9 +1286,9 @@ renditionAdjustFrame(int scrnIndex, int x, int y, int flags)
 
 
 static Bool
-renditionEnterVT(int scrnIndex, int flags)
+renditionEnterVT(VT_FUNC_ARGS_DECL)
 {
-    ScrnInfoPtr pScreenInfo = xf86Screens[scrnIndex];
+    SCRN_INFO_PTR(arg);
     vgaHWPtr pvgaHW = VGAHWPTR(pScreenInfo);
 
 #ifdef DEBUG
@@ -1304,32 +1305,34 @@ renditionEnterVT(int scrnIndex, int flags)
     if (!renditionSetMode(pScreenInfo, pScreenInfo->currentMode))
         return FALSE;
 
-    (*pScreenInfo->AdjustFrame)(pScreenInfo->scrnIndex,
-				pScreenInfo->frameX0, pScreenInfo->frameY0, 0);
+    (*pScreenInfo->AdjustFrame)(ADJUST_FRAME_ARGS(pScreenInfo,
+						  pScreenInfo->frameX0, pScreenInfo->frameY0));
 
     return TRUE;
 }
 
 
 static void
-renditionLeaveVT(int scrnIndex, int flags)
+renditionLeaveVT(VT_FUNC_ARGS_DECL)
 {
+    SCRN_INFO_PTR(arg);
 #ifdef DEBUG
     ErrorF("RENDITION: renditionLeaveVT() called\n");
 #endif
-    renditionLeaveGraphics(xf86Screens[scrnIndex]);
+    renditionLeaveGraphics(pScreenInfo);
 }
 
 
 static void
-renditionFreeScreen(int scrnIndex, int flags)
+renditionFreeScreen(FREE_SCREEN_ARGS_DECL)
 {
-    renditionFreeRec(xf86Screens[scrnIndex]);
+    SCRN_INFO_PTR(arg);
+    renditionFreeRec(pScreenInfo);
 }
 
 
 static ModeStatus
-renditionValidMode(int scrnIndex, DisplayModePtr pMode, Bool Verbose, 
+renditionValidMode(SCRN_ARG_TYPE arg, DisplayModePtr pMode, Bool Verbose, 
 		   int flags)
 {
     if (pMode->Flags & V_INTERLACE)

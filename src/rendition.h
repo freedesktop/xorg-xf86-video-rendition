@@ -65,5 +65,6 @@
 
 #include "commonregs.h"
 
+#include "compat-api.h"
 /* end of __RENDITION_H__ */
 #endif
