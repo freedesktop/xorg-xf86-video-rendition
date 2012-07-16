@@ -185,7 +185,9 @@ typedef struct _renditionRec
     EntityInfoPtr pEnt;                 /* entity information */
     CloseScreenProcPtr CloseScreen;     /* wrap CloseScreen */
     xf86CursorInfoPtr CursorInfoRec;    /* Cursor data */
+#ifdef HAVE_XAA_H
     XAAInfoRecPtr AccelInfoRec;         /* Needed for XAA */
+#endif
     OptionInfoPtr Options;
     RenditionRegRec saveRegs;
 } renditionRec, *renditionPtr;

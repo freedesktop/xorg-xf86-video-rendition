@@ -53,8 +53,10 @@
 #include "fb.h"
 
 /* Drivers using the XAA interface ... */
+#ifdef HAVE_XAA_H
 #include "xaa.h"
 #include "xaalocal.h"
+#endif
 #include "xf86fbman.h"
 
 /* HW-cursor definitions */
