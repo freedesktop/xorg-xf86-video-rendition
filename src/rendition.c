@@ -1075,6 +1075,7 @@ renditionScreenInit(SCREEN_INIT_ARGS_DECL)
     VisualPtr visual;
     vgaHWPtr pvgaHW;
     int displayWidth,width,height;
+    int scrnIndex = pScreenInfo->scrnIndex;
 
 #ifdef DEBUG
     ErrorF("RENDITION: renditionScreenInit() called\n");
